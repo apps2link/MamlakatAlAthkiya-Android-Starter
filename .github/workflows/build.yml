@@ -1,0 +1,46 @@
+
+name: Build Mamlakat Al Athkiya APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract Android project
+        run: |
+          mkdir -p project
+          unzip -o MamlakatAlAthkiya-Android-Starter.zip -d project
+          echo "Project extracted successfully"
+          ls -la project
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Debug APK
+        working-directory: project/MamlakatAlAthkiya
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mamlakat-Al-Athkiya-APK
+          path: project/MamlakatAlAthkiya/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
